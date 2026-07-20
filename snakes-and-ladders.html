@@ -109,6 +109,14 @@
     background: #b84a1a;
   }
 
+  .sq-fire {
+    position: absolute;
+    bottom: 4px;
+    right: 5px;
+    font-size: 0.7rem;
+    line-height: 1;
+  }
+
   /* Colour palette — warm alternating */
   .c0 { background: #fdf5e6; }
   .c1 { background: #eef5ee; }
@@ -132,6 +140,8 @@
     font-size: 0.78rem;
     color: #7a6a52;
     font-style: italic;
+    flex-wrap: wrap;
+    justify-content: center;
   }
 
   .legend-item {
@@ -144,6 +154,7 @@
     width: 8px; height: 8px;
     border-radius: 50%;
     background: #b84a1a;
+    flex-shrink: 0;
   }
 
   /* ── Slide-in panel ── */
@@ -263,8 +274,9 @@
 </div>
 
 <div class="legend">
-  <span class="legend-item"><span class="legend-dot"></span> Square has an essay</span>
-  <span>· Use ← → keys to navigate between essays</span>
+  <span class="legend-item"><span class="legend-dot"></span> Guidance &amp; instructions</span>
+  <span class="legend-item"><span>🔥</span> Hot take</span>
+  <span>· Use ← → keys to navigate</span>
 </div>
 
 <div class="backdrop" id="backdrop" onclick="closePanel()"></div>
@@ -290,6 +302,21 @@
 //  Key = square number (1–30), value = { title, body (HTML) }
 // ─────────────────────────────────────────────────────────────────────
 const CONTENT = {
+  1: {
+    title: "Start here!",
+    type: "instructions",
+    body: `<h2>So You've Been Made Redundant: How to Think About Your Next Move</h2>
+           <p>The call comes, or the meeting appears without context in your calendar, and then it's done. You have a settlement figure, a leaving date, and a strange afternoon ahead of you with nothing in it.</p>
+           <p>The first instinct — and almost everyone has it — is to act. Update the CV. Post something on LinkedIn. Start scrolling job boards. Do something, because doing something feels like control, and control (or the illusion of control) is the thing you've just lost.</p>
+           <p>I know this because I did all of it. And I wish someone had sat me down first and said: before you move, find out where you actually are.</p>
+           <p>This is that conversation.</p>
+           <h2>The Game You're Now Playing</h2>
+           <p>Think of what comes next as a game of snakes and ladders. Some moves feel productive and set you back weeks. Others feel slow, almost passive, and turn out to be the things that actually accelerate everything.</p>
+           <p>The snakes are usually the urgent-feeling moves: applying for roles before you've got clarity on what you're offering, blasting your network with a "just to let you know" message before you know what you're asking for, letting financial anxiety drive decisions that should be driven by strategy.</p>
+           <p>The ladders are less obvious. Restoring your baseline before you start. Knowing the difference between being networked and being connected. Briefing the people who will speak for you before they speak for you.</p>
+           <p>None of this is complicated. But almost nobody does it, because the pressure to be seen to be doing something is enormous — and it arrives on day one.</p>
+           <p>This article is the starting point of a series. Each piece will go deeper on one of the threads that runs through here. But this one is the spine: a way to take stock of where you actually are, before you make your first move.</p>`
+  },
   2: {
     title: "First Steps",
     body: `<p>Replace this with your essay for square 2. You can use as many paragraphs as you like — the panel scrolls.</p>
@@ -363,9 +390,16 @@ GRID.forEach((row, ri) => {
       lbl.textContent = CONTENT[num].title;
       sq.appendChild(lbl);
 
-      const dot = document.createElement('div');
-      dot.className = 'sq-dot';
-      sq.appendChild(dot);
+      if (CONTENT[num].type === 'hot-take') {
+        const fire = document.createElement('div');
+        fire.className = 'sq-fire';
+        fire.textContent = '🔥';
+        sq.appendChild(fire);
+      } else {
+        const dot = document.createElement('div');
+        dot.className = 'sq-dot';
+        sq.appendChild(dot);
+      }
 
       sq.addEventListener('click', () => openPanel(num));
     }
