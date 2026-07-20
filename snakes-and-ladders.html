@@ -47,14 +47,16 @@
     box-shadow: 6px 6px 0 #1e1108;
     background: #fff;
     position: relative;
+    width: min(540px, calc(100vw - 40px));
+    aspect-ratio: 6/5;
   }
 
   .board {
     display: grid;
-    grid-template-columns: repeat(6, 90px);
-    grid-template-rows: repeat(5, 90px);
-    width: 540px;
-    height: 450px;
+    grid-template-columns: repeat(6, 1fr);
+    grid-template-rows: repeat(5, 1fr);
+    width: 100%;
+    height: 100%;
     position: relative;
   }
 
@@ -117,7 +119,7 @@
   .board-svg {
     position: absolute;
     top: 0; left: 0;
-    width: 540px; height: 450px;
+    width: 100%; height: 100%;
     pointer-events: none;
   }
 
@@ -372,14 +374,17 @@ GRID.forEach((row, ri) => {
   });
 });
 
-// ── Square centre coords ──────────────────────────────────────────────
-const SQ = 90; // px per square
+// ── Square centre coords (relative to 540×450 viewBox, scales automatically) ──
+const SQ = 90;
 function centre(num) {
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 6; c++)
       if (GRID[r][c] === num)
         return { x: c * SQ + SQ/2, y: r * SQ + SQ/2 };
 }
+
+// Set SVG viewBox so coordinates always match the grid regardless of screen size
+document.getElementById('svg').setAttribute('viewBox', '0 0 540 450');
 
 // ── Draw snakes & ladders ─────────────────────────────────────────────
 //  Ladders go FROM lower number TO higher number (upward)
