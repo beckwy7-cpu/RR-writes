@@ -15,8 +15,34 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 16px 12px 20px;
+    padding: 16px 24px 20px;
     overflow: visible;
+  }
+
+  /* ── Main layout: board left, controls right ── */
+  .main-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: 40px;
+    width: 100%;
+  }
+
+  .board-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .controls-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 18px;
+    padding-top: 24px;
+    flex: 0 0 180px;
   }
 
   /* ── Board ── */
@@ -25,7 +51,8 @@
     box-shadow: none;
     background: #fff;
     position: relative;
-    width: min(540px, calc(100vw - 40px));
+    width: 100%;
+    max-width: 540px;
     aspect-ratio: 6/5;
   }
 
@@ -133,18 +160,18 @@
 
   /* ── Game controls ── */
   .game-controls {
-    margin-top: 18px;
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    width: min(540px, calc(100vw - 40px));
+    width: 100%;
   }
 
   .dice-row {
     display: flex;
+    flex-direction: column;
     align-items: center;
-    gap: 20px;
+    gap: 14px;
   }
 
   .dice-face {
@@ -253,7 +280,7 @@
     color: #1e1108;
     font-size: 1.08rem;
     line-height: 1.9;
-    max-width: 680px;
+    max-width: 780px;
     width: 100%;
     align-self: center;
   }
@@ -263,27 +290,30 @@
 </head>
 <body>
 
-<div class="board-frame">
-  <div class="board" id="board"></div>
-  <svg class="board-svg" id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
-  <div class="token" id="token"></div>
-</div>
-
-<div class="legend">
-  <span class="legend-item"><span class="legend-dot"></span> Guidance &amp; instructions</span>
-  <span class="legend-item"><span>🔥</span> Hot take</span>
-  <span>· Click any square to read</span>
-</div>
-
-<div class="game-controls">
-  <div class="dice-row">
-    <div class="dice-face" id="diceFace"></div>
-    <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
-      <button class="roll-btn" id="rollBtn" onclick="rollDice()">Roll the dice</button>
-      <button class="reset-btn" onclick="resetGame()">Start over</button>
+<div class="main-layout" id="mainLayout">
+  <div class="board-column">
+    <div class="board-frame">
+      <div class="board" id="board"></div>
+      <svg class="board-svg" id="svg" xmlns="http://www.w3.org/2000/svg"></svg>
+      <div class="token" id="token"></div>
+    </div>
+    <div class="legend">
+      <span class="legend-item"><span class="legend-dot"></span> Guidance &amp; instructions</span>
+      <span class="legend-item"><span>🔥</span> Hot take</span>
+      <span>· Click any square to read</span>
     </div>
   </div>
-  <div class="status" id="status"></div>
+
+  <div class="controls-column" id="gameControls">
+    <div class="game-controls">
+      <div class="dice-row">
+        <div class="dice-face" id="diceFace"></div>
+        <button class="roll-btn" id="rollBtn" onclick="rollDice()">Roll the dice</button>
+        <button class="reset-btn" onclick="resetGame()">Start over</button>
+      </div>
+      <div class="status" id="status"></div>
+    </div>
+  </div>
 </div>
 
 <div class="essay-view" id="essayView">
@@ -658,10 +688,8 @@ function resetGame() {
 const keys = Object.keys(CONTENT).map(Number).sort((a,b)=>a-b);
 let current = null;
 
-const boardSection  = document.querySelector('.board-frame');
-const legendSection = document.querySelector('.legend');
-const gameControls  = document.querySelector('.game-controls');
-const essayView     = document.getElementById('essayView');
+const mainLayout = document.getElementById('mainLayout');
+const essayView  = document.getElementById('essayView');
 
 function openPanel(num) {
   current = num;
@@ -673,19 +701,14 @@ function openPanel(num) {
   document.getElementById('prevBtn').disabled = idx === 0;
   document.getElementById('nextBtn').disabled = idx === keys.length-1;
 
-  // Hide board, show essay
-  boardSection.style.display  = 'none';
-  legendSection.style.display = 'none';
-  gameControls.style.display  = 'none';
+  mainLayout.style.display = 'none';
   essayView.classList.add('open');
   window.scrollTo(0, 0);
 }
 
 function closePanel() {
   essayView.classList.remove('open');
-  boardSection.style.display  = '';
-  legendSection.style.display = '';
-  gameControls.style.display  = '';
+  mainLayout.style.display = '';
   current = null;
 }
 
