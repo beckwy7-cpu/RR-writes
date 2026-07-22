@@ -14,18 +14,17 @@
 
   body {
     font-family: 'Georgia', serif;
-    background: #f5f0e8;
-    min-height: 620px;
+    background: transparent;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 40px 20px 60px;
+    padding: 16px 12px 20px;
     overflow: visible;
   }
 
   header {
     text-align: center;
-    margin-bottom: 36px;
+    margin-bottom: 14px;
   }
 
   header h1 {
@@ -43,8 +42,8 @@
 
   /* ── Board ── */
   .board-frame {
-    border: 4px solid #1e1108;
-    box-shadow: 6px 6px 0 #1e1108;
+    border: 4px solid #111111;
+    box-shadow: none;
     background: #fff;
     position: relative;
     width: min(540px, calc(100vw - 40px));
@@ -61,8 +60,8 @@
   }
 
   .square {
-    border-right: 1px solid rgba(30,17,8,0.15);
-    border-bottom: 1px solid rgba(30,17,8,0.15);
+    border-right: 1px solid rgba(0,0,0,0.25);
+    border-bottom: 1px solid rgba(0,0,0,0.25);
     display: flex;
     flex-direction: column;
     padding: 7px 9px 7px 9px;
@@ -86,14 +85,14 @@
   .sq-num {
     font-size: 0.65rem;
     font-weight: bold;
-    color: rgba(30,17,8,0.45);
+    color: #ff00cc;
     line-height: 1;
     flex-shrink: 0;
   }
 
   .sq-label {
     font-size: 0.58rem;
-    color: #1e1108;
+    color: #ff00cc;
     margin-top: 5px;
     line-height: 1.35;
     font-style: italic;
@@ -106,7 +105,7 @@
     width: 7px;
     height: 7px;
     border-radius: 50%;
-    background: #b84a1a;
+    background: #ff00cc;
   }
 
   .sq-fire {
@@ -117,11 +116,11 @@
     line-height: 1;
   }
 
-  /* Colour palette — warm alternating */
-  .c0 { background: #fdf5e6; }
-  .c1 { background: #eef5ee; }
-  .c2 { background: #eeeaf8; }
-  .c3 { background: #fdeee8; }
+  /* Checkerboard — black and white */
+  .c0 { background: #ffffff; }
+  .c1 { background: #111111; }
+  .c2 { background: #ffffff; }
+  .c3 { background: #111111; }
 
   /* SVG overlay */
   .board-svg {
@@ -133,7 +132,7 @@
 
   /* Legend */
   .legend {
-    margin-top: 18px;
+    margin-top: 10px;
     display: flex;
     align-items: center;
     gap: 20px;
