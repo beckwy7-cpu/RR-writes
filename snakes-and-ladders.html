@@ -155,15 +155,10 @@
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.8rem;
-    font-weight: bold;
-    color: #111;
-    font-family: 'Georgia', serif;
     user-select: none;
+    padding: 8px;
     transition: transform 0.08s;
   }
-
-  .dice-face.rolling { color: #ff00cc; }
 
   .roll-btn {
     background: #111;
@@ -204,46 +199,25 @@
     padding: 0 12px;
   }
 
-  /* ── Slide-in panel ── */
-  .backdrop {
-    position: fixed;
-    inset: 0;
-    background: rgba(30,17,8,0.35);
-    z-index: 100;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-  .backdrop.open { opacity: 1; pointer-events: all; }
-
-  .panel {
-    position: fixed;
-    top: 0; right: -110%;
+  /* ── Essay view ── */
+  .essay-view {
+    display: none;
     width: 100%;
-    height: 100vh;
-    background: #faf7f2;
-    z-index: 101;
-    display: flex;
+    padding: 32px 24px 60px;
     flex-direction: column;
-    box-shadow: -6px 0 40px rgba(30,17,8,0.18);
-    transition: right 0.38s cubic-bezier(0.32, 0, 0.24, 1);
   }
-  .panel.open { right: 0; }
+  .essay-view.open { display: flex; }
 
-  .panel-top {
-    padding: 22px max(40px, calc(50% - 340px)) 18px;
-    border-bottom: 1px solid #ddd5c4;
+  .essay-top {
     display: flex;
     align-items: center;
     gap: 14px;
-    flex-shrink: 0;
-    background: #faf7f2;
+    margin-bottom: 36px;
+    padding-bottom: 18px;
+    border-bottom: 1px solid #ddd5c4;
   }
 
   .back-btn {
-    display: flex;
-    align-items: center;
-    gap: 6px;
     background: none;
     border: 1.5px solid #1e1108;
     color: #1e1108;
@@ -258,11 +232,11 @@
   }
   .back-btn:hover { background: #1e1108; color: #faf7f2; }
 
-  .panel-meta { flex: 1; min-width: 0; }
-  .panel-sq { font-size: 0.7rem; color: #9a8870; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
-  .panel-title { font-size: 1.2rem; color: #1e1108; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .essay-meta { flex: 1; min-width: 0; }
+  .essay-sq { font-size: 0.7rem; color: #9a8870; margin-bottom: 2px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .essay-title { font-size: 1.2rem; color: #1e1108; }
 
-  .panel-nav { display: flex; gap: 6px; flex-shrink: 0; }
+  .essay-nav { display: flex; gap: 6px; flex-shrink: 0; }
   .nav-btn {
     width: 34px; height: 34px;
     border: 1.5px solid #c4b49e;
@@ -275,23 +249,16 @@
   .nav-btn:hover:not(:disabled) { border-color: #1e1108; color: #1e1108; }
   .nav-btn:disabled { opacity: 0.28; cursor: default; }
 
-  .panel-body {
-    flex: 1;
-    overflow-y: auto;
-    padding: 52px 0 80px;
+  .essay-body {
     color: #1e1108;
     font-size: 1.08rem;
     line-height: 1.9;
-    display: flex;
-    justify-content: center;
+    max-width: 680px;
+    width: 100%;
+    align-self: center;
   }
-
-  .panel-body-inner {
-    width: min(680px, calc(100% - 80px));
-  }
-
-  .panel-body p  { margin-bottom: 1.3em; }
-  .panel-body h2 { font-size: 1.15rem; margin: 1.8em 0 0.7em; }
+  .essay-body p  { margin-bottom: 1.3em; }
+  .essay-body h2 { font-size: 1.15rem; margin: 1.8em 0 0.7em; }
 </style>
 </head>
 <body>
@@ -310,30 +277,28 @@
 
 <div class="game-controls">
   <div class="dice-row">
-    <div class="dice-face" id="diceFace">?</div>
+    <div class="dice-face" id="diceFace"></div>
     <div style="display:flex;flex-direction:column;gap:8px;align-items:center">
       <button class="roll-btn" id="rollBtn" onclick="rollDice()">Roll the dice</button>
       <button class="reset-btn" onclick="resetGame()">Start over</button>
     </div>
   </div>
-  <div class="status" id="status">Roll to start your journey.</div>
+  <div class="status" id="status"></div>
 </div>
 
-<div class="backdrop" id="backdrop" onclick="closePanel()"></div>
-
-<div class="panel" id="panel">
-  <div class="panel-top">
-    <button class="back-btn" onclick="closePanel()">&#8592; Board</button>
-    <div class="panel-meta">
-      <div class="panel-sq" id="pNum"></div>
-      <div class="panel-title" id="pTitle"></div>
+<div class="essay-view" id="essayView">
+  <div class="essay-top">
+    <button class="back-btn" onclick="closePanel()">&#8592; Back to board</button>
+    <div class="essay-meta">
+      <div class="essay-sq" id="pNum"></div>
+      <div class="essay-title" id="pTitle"></div>
     </div>
-    <div class="panel-nav">
+    <div class="essay-nav">
       <button class="nav-btn" id="prevBtn" onclick="navigate(-1)" title="Previous">&#8592;</button>
       <button class="nav-btn" id="nextBtn" onclick="navigate(1)" title="Next">&#8594;</button>
     </div>
   </div>
-  <div class="panel-body" id="pBody"></div>
+  <div class="essay-body" id="pBody"></div>
 </div>
 
 <script>
@@ -570,6 +535,27 @@ const diceFace = document.getElementById('diceFace');
 const rollBtn  = document.getElementById('rollBtn');
 const statusEl = document.getElementById('status');
 
+// ── Dice pip positions (x%, y% within 100×100 viewBox) ───────────────
+const PIPS = {
+  1: [[50,50]],
+  2: [[30,30],[70,70]],
+  3: [[30,30],[50,50],[70,70]],
+  4: [[30,30],[70,30],[30,70],[70,70]],
+  5: [[30,30],[70,30],[50,50],[30,70],[70,70]],
+  6: [[30,30],[70,30],[30,50],[70,50],[30,70],[70,70]]
+};
+
+function renderDice(n, rolling = false) {
+  const color = rolling ? '#ff00cc' : '#111111';
+  if (!n) { diceFace.innerHTML = ''; return; }
+  const dots = PIPS[n].map(([x,y]) =>
+    `<circle cx="${x}" cy="${y}" r="10" fill="${color}"/>`
+  ).join('');
+  diceFace.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">${dots}</svg>`;
+}
+
+renderDice(null);
+
 function squarePercent(num) {
   for (let r = 0; r < 5; r++)
     for (let c = 0; c < 6; c++)
@@ -596,14 +582,12 @@ async function rollDice() {
   rollBtn.disabled = true;
 
   // Spin animation
-  diceFace.classList.add('rolling');
   for (let i = 0; i < 14; i++) {
-    diceFace.textContent = Math.ceil(Math.random()*6);
+    renderDice(Math.ceil(Math.random()*6), true);
     await sleep(60 + i*5);
   }
   const result = Math.ceil(Math.random()*6);
-  diceFace.textContent = result;
-  diceFace.classList.remove('rolling');
+  renderDice(result, false);
 
   await sleep(300);
   await movePlayer(result);
@@ -662,34 +646,46 @@ async function movePlayer(steps) {
 function resetGame() {
   playerSquare = 0;
   tokenEl.style.display = 'none';
-  diceFace.textContent = '?';
+  renderDice(null);
   rollBtn.disabled = false;
   isAnimating = false;
-  setStatus('Roll to start your journey.');
+  setStatus('');
 }
 
 // ─────────────────────────────────────────────────────────────────────
-//  Reading panel
+//  Reading view
 // ─────────────────────────────────────────────────────────────────────
 const keys = Object.keys(CONTENT).map(Number).sort((a,b)=>a-b);
 let current = null;
+
+const boardSection  = document.querySelector('.board-frame');
+const legendSection = document.querySelector('.legend');
+const gameControls  = document.querySelector('.game-controls');
+const essayView     = document.getElementById('essayView');
 
 function openPanel(num) {
   current = num;
   document.getElementById('pNum').textContent = `Square ${num}`;
   document.getElementById('pTitle').textContent = CONTENT[num].title;
-  document.getElementById('pBody').innerHTML = `<div class="panel-body-inner">${CONTENT[num].body}</div>`;
+  document.getElementById('pBody').innerHTML = CONTENT[num].body;
   document.getElementById('pBody').scrollTop = 0;
   const idx = keys.indexOf(num);
   document.getElementById('prevBtn').disabled = idx === 0;
   document.getElementById('nextBtn').disabled = idx === keys.length-1;
-  document.getElementById('panel').classList.add('open');
-  document.getElementById('backdrop').classList.add('open');
+
+  // Hide board, show essay
+  boardSection.style.display  = 'none';
+  legendSection.style.display = 'none';
+  gameControls.style.display  = 'none';
+  essayView.classList.add('open');
+  window.scrollTo(0, 0);
 }
 
 function closePanel() {
-  document.getElementById('panel').classList.remove('open');
-  document.getElementById('backdrop').classList.remove('open');
+  essayView.classList.remove('open');
+  boardSection.style.display  = '';
+  legendSection.style.display = '';
+  gameControls.style.display  = '';
   current = null;
 }
 
