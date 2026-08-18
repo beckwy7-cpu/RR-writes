@@ -21,19 +21,16 @@
 
   /* ── Main layout: board left, controls right ── */
   .main-layout {
-    display: flex;
+    display: inline-flex;
     flex-direction: row;
     align-items: flex-start;
     gap: 20px;
-    width: 100%;
-    justify-content: center;
   }
 
   .board-column {
     display: flex;
     flex-direction: column;
     align-items: center;
-    flex: 0 0 auto;
   }
 
   .controls-column {
@@ -42,7 +39,8 @@
     align-items: center;
     gap: 18px;
     padding-top: 8px;
-    flex: 0 0 160px;
+    width: 160px;
+    flex-shrink: 0;
   }
 
   /* ── Board ── */
@@ -51,8 +49,7 @@
     box-shadow: none;
     background: #fff;
     position: relative;
-    width: 100%;
-    max-width: 540px;
+    width: min(500px, calc(100vw - 220px));
     aspect-ratio: 6/5;
   }
 
@@ -175,16 +172,25 @@
   }
 
   .dice-face {
-    width: 56px; height: 56px;
-    border: 3px solid #111;
-    border-radius: 10px;
-    background: white;
+    width: 64px; height: 64px;
+    border: none;
+    border-radius: 12px;
+    background: linear-gradient(145deg, #ffffff 0%, #d8d8d8 100%);
+    box-shadow:
+      3px 3px 6px rgba(0,0,0,0.35),
+      -1px -1px 3px rgba(255,255,255,0.9),
+      inset 1px 1px 2px rgba(255,255,255,0.8),
+      inset -1px -1px 2px rgba(0,0,0,0.1);
     display: flex;
     align-items: center;
     justify-content: center;
     user-select: none;
-    padding: 8px;
-    transition: transform 0.08s;
+    padding: 10px;
+    transition: transform 0.08s, box-shadow 0.08s;
+  }
+
+  .dice-face:not(:empty) {
+    transform: perspective(200px) rotateX(5deg) rotateY(-5deg);
   }
 
   .roll-btn {
@@ -445,8 +451,6 @@ function centre(num) {
         return { x: c * SQ + SQ/2, y: r * SQ + SQ/2 };
 }
 
-document.getElementById('svg').setAttribute('viewBox', '0 0 540 450');
-
 // ── SVG helpers ───────────────────────────────────────────────────────
 const svg = document.getElementById('svg');
 const NS = 'http://www.w3.org/2000/svg';
@@ -456,41 +460,48 @@ function el(tag, attrs) {
   return e;
 }
 
+svg.setAttribute('viewBox', '0 0 540 450');
+
+// Elevation shadow filter — applied to snakes and ladders to lift them off the board
+const svgDefs = el('defs', {});
+const elevFilter = el('filter', { id:'elev', x:'-30%', y:'-30%', width:'160%', height:'160%' });
+const dropShadow = el('feDropShadow', { dx:'2', dy:'4', stdDeviation:'4', 'flood-color':'rgba(0,0,0,0.28)' });
+elevFilter.appendChild(dropShadow);
+svgDefs.appendChild(elevFilter);
+svg.appendChild(svgDefs);
+
 // ── Ladders ───────────────────────────────────────────────────────────
 function drawLadder(from, to) {
+  const g = el('g', { filter:'url(#elev)' });
   const a = centre(from), b = centre(to);
   const dx = b.x-a.x, dy = b.y-a.y;
   const len = Math.hypot(dx,dy);
   const nx = -dy/len, ny = dx/len;
   const W = 10;
 
-  svg.appendChild(el('line', { x1:a.x+3,y1:a.y+3,x2:b.x+3,y2:b.y+3,
-    stroke:'rgba(0,0,0,0.12)','stroke-width':W*2+6,'stroke-linecap':'round' }));
-
   [1,-1].forEach(s => {
-    svg.appendChild(el('line', { x1:a.x+nx*W*s,y1:a.y+ny*W*s,x2:b.x+nx*W*s,y2:b.y+ny*W*s,
+    g.appendChild(el('line', { x1:a.x+nx*W*s,y1:a.y+ny*W*s,x2:b.x+nx*W*s,y2:b.y+ny*W*s,
       stroke:'#5c3310','stroke-width':7,'stroke-linecap':'round' }));
-    svg.appendChild(el('line', { x1:a.x+nx*W*s,y1:a.y+ny*W*s,x2:b.x+nx*W*s,y2:b.y+ny*W*s,
+    g.appendChild(el('line', { x1:a.x+nx*W*s,y1:a.y+ny*W*s,x2:b.x+nx*W*s,y2:b.y+ny*W*s,
       stroke:'#a0632a','stroke-width':5,'stroke-linecap':'round' }));
-    if (s===1) svg.appendChild(el('line', { x1:a.x+nx*(W-1),y1:a.y+ny*(W-1),x2:b.x+nx*(W-1),y2:b.y+ny*(W-1),
+    if (s===1) g.appendChild(el('line', { x1:a.x+nx*(W-1),y1:a.y+ny*(W-1),x2:b.x+nx*(W-1),y2:b.y+ny*(W-1),
       stroke:'rgba(255,210,140,0.45)','stroke-width':2,'stroke-linecap':'round' }));
   });
 
   const steps = Math.max(2, Math.ceil(len/22));
   for (let i = 1; i < steps; i++) {
     const t = i/steps, rx = a.x+dx*t, ry = a.y+dy*t;
-    svg.appendChild(el('line', { x1:rx+nx*W*1.15+1,y1:ry+ny*W*1.15+1,x2:rx-nx*W*1.15+1,y2:ry-ny*W*1.15+1,
-      stroke:'rgba(0,0,0,0.15)','stroke-width':5,'stroke-linecap':'round' }));
-    svg.appendChild(el('line', { x1:rx+nx*W*1.15,y1:ry+ny*W*1.15,x2:rx-nx*W*1.15,y2:ry-ny*W*1.15,
+    g.appendChild(el('line', { x1:rx+nx*W*1.15,y1:ry+ny*W*1.15,x2:rx-nx*W*1.15,y2:ry-ny*W*1.15,
       stroke:'#7a4820','stroke-width':5,'stroke-linecap':'round' }));
   }
 
   [a,b].forEach(pt => {
-    svg.appendChild(el('circle',{cx:pt.x+1,cy:pt.y+1,r:7,fill:'rgba(0,0,0,0.15)'}));
-    svg.appendChild(el('circle',{cx:pt.x,cy:pt.y,r:7,fill:'#5c3310'}));
-    svg.appendChild(el('circle',{cx:pt.x,cy:pt.y,r:4,fill:'#c89050'}));
-    svg.appendChild(el('circle',{cx:pt.x-1,cy:pt.y-1,r:1.5,fill:'rgba(255,240,180,0.8)'}));
+    g.appendChild(el('circle',{cx:pt.x,cy:pt.y,r:7,fill:'#5c3310'}));
+    g.appendChild(el('circle',{cx:pt.x,cy:pt.y,r:4,fill:'#c89050'}));
+    g.appendChild(el('circle',{cx:pt.x-1,cy:pt.y-1,r:1.5,fill:'rgba(255,240,180,0.8)'}));
   });
+
+  svg.appendChild(g);
 }
 
 // ── Snakes ────────────────────────────────────────────────────────────
@@ -502,6 +513,7 @@ const SNAKE_PALETTE = [
 let _si = 0;
 
 function drawSnake(from, to) {
+  const g = el('g', { filter:'url(#elev)' });
   const a = centre(from), b = centre(to);
   const sc = SNAKE_PALETTE[_si++ % 3];
   const dx = b.x-a.x, dy = b.y-a.y;
@@ -512,50 +524,52 @@ function drawSnake(from, to) {
   const cp2x = a.x+dx*0.70-px*wig, cp2y = a.y+dy*0.70-py*wig;
   const d = `M${a.x},${a.y} C${cp1x},${cp1y} ${cp2x},${cp2y} ${b.x},${b.y}`;
 
-  svg.appendChild(el('path',{d,stroke:'rgba(0,0,0,0.13)','stroke-width':17,fill:'none','stroke-linecap':'round'}));
-  svg.appendChild(el('path',{d,stroke:sc.dark,'stroke-width':17,fill:'none','stroke-linecap':'round'}));
-  svg.appendChild(el('path',{d,stroke:sc.body,'stroke-width':13,fill:'none','stroke-linecap':'round'}));
-  svg.appendChild(el('path',{d,stroke:sc.mid,'stroke-width':7,fill:'none','stroke-linecap':'round'}));
-  svg.appendChild(el('path',{d,stroke:sc.belly,'stroke-width':3,fill:'none','stroke-linecap':'round','stroke-dasharray':'5 9'}));
+  // Outline — full opacity dark border
+  g.appendChild(el('path',{d,stroke:sc.dark,'stroke-width':17,fill:'none','stroke-linecap':'round'}));
+  // Body fill — semi-transparent so squares show through
+  g.appendChild(el('path',{d,stroke:sc.body,'stroke-width':13,fill:'none','stroke-linecap':'round',opacity:'0.45'}));
+  // Scale segments — dashed pattern suggesting body scales
+  g.appendChild(el('path',{d,stroke:sc.dark,'stroke-width':9,fill:'none','stroke-linecap':'round',opacity:'0.4','stroke-dasharray':'10 6'}));
+  // Lighter highlight scales offset
+  g.appendChild(el('path',{d,stroke:sc.mid,'stroke-width':5,fill:'none','stroke-linecap':'round',opacity:'0.35','stroke-dasharray':'10 6','stroke-dashoffset':'8'}));
 
   const headDir = Math.atan2(a.y-cp1y, a.x-cp1x);
-  svg.appendChild(el('circle',{cx:a.x+2,cy:a.y+3,r:15,fill:'rgba(0,0,0,0.12)'}));
-  svg.appendChild(el('circle',{cx:a.x,cy:a.y,r:15,fill:sc.dark}));
-  svg.appendChild(el('circle',{cx:a.x,cy:a.y,r:12,fill:sc.body}));
+  g.appendChild(el('circle',{cx:a.x,cy:a.y,r:15,fill:sc.dark}));
+  g.appendChild(el('circle',{cx:a.x,cy:a.y,r:12,fill:sc.body}));
 
   [-1,1].forEach(s => {
     const ex = a.x+Math.cos(headDir+s*0.58)*8, ey = a.y+Math.sin(headDir+s*0.58)*8;
-    svg.appendChild(el('circle',{cx:ex+0.5,cy:ey+0.5,r:5.5,fill:'rgba(0,0,0,0.12)'}));
-    svg.appendChild(el('circle',{cx:ex,cy:ey,r:5.5,fill:'white'}));
+    g.appendChild(el('circle',{cx:ex,cy:ey,r:5.5,fill:'white'}));
     const px2=ex+Math.cos(headDir)*2, py2=ey+Math.sin(headDir)*2;
-    svg.appendChild(el('circle',{cx:px2,cy:py2,r:2.8,fill:'#1a0a00'}));
-    svg.appendChild(el('circle',{cx:px2-1,cy:py2-1,r:1,fill:'white'}));
+    g.appendChild(el('circle',{cx:px2,cy:py2,r:2.8,fill:'#1a0a00'}));
+    g.appendChild(el('circle',{cx:px2-1,cy:py2-1,r:1,fill:'white'}));
   });
 
   const tx=a.x+Math.cos(headDir)*15, ty=a.y+Math.sin(headDir)*15;
-  svg.appendChild(el('line',{x1:a.x+Math.cos(headDir)*13,y1:a.y+Math.sin(headDir)*13,x2:tx,y2:ty,
+  g.appendChild(el('line',{x1:a.x+Math.cos(headDir)*13,y1:a.y+Math.sin(headDir)*13,x2:tx,y2:ty,
     stroke:'#e03030','stroke-width':2.5,'stroke-linecap':'round'}));
-  [0.38,-0.38].forEach(f => svg.appendChild(el('line',{
+  [0.38,-0.38].forEach(f => g.appendChild(el('line',{
     x1:tx,y1:ty,x2:tx+Math.cos(headDir+f)*9,y2:ty+Math.sin(headDir+f)*9,
     stroke:'#e03030','stroke-width':2,'stroke-linecap':'round'})));
 
-  svg.appendChild(el('circle',{cx:b.x,cy:b.y,r:5,fill:sc.body}));
-  svg.appendChild(el('circle',{cx:b.x,cy:b.y,r:2.5,fill:sc.dark}));
+  g.appendChild(el('circle',{cx:b.x,cy:b.y,r:5,fill:sc.body}));
+  g.appendChild(el('circle',{cx:b.x,cy:b.y,r:2.5,fill:sc.dark}));
+  svg.appendChild(g);
 }
 
-drawLadder(1, 10);
-drawLadder(7, 16);
+drawLadder(12, 23);
+drawLadder(7, 18);
 drawLadder(3, 20);
 
 drawSnake(17, 13);
 drawSnake(22, 11);
-drawSnake(29,  4);
+drawSnake(26,  5);
 
 // ─────────────────────────────────────────────────────────────────────
 //  Game logic
 // ─────────────────────────────────────────────────────────────────────
-const LADDERS = { 1:10, 3:20, 7:16 };
-const SNAKES  = { 17:13, 22:11, 29:4 };
+const LADDERS = { 12:23, 3:20, 7:18 };
+const SNAKES  = { 17:13, 22:11, 26:5 };
 
 let playerSquare = 0;
 let isAnimating  = false;
@@ -576,15 +590,26 @@ const PIPS = {
 };
 
 function renderDice(n, rolling = false) {
-  const color = rolling ? '#ff00cc' : '#111111';
+  const color = rolling ? '#ff00cc' : '#1a1a1a';
+  const highlight = rolling ? 'rgba(255,180,240,0.6)' : 'rgba(255,255,255,0.55)';
   if (!n) { diceFace.innerHTML = ''; return; }
+  const defs = `<defs>
+    <radialGradient id="pip" cx="38%" cy="35%" r="60%">
+      <stop offset="0%" stop-color="${highlight}"/>
+      <stop offset="100%" stop-color="${color}"/>
+    </radialGradient>
+  </defs>`;
   const dots = PIPS[n].map(([x,y]) =>
-    `<circle cx="${x}" cy="${y}" r="10" fill="${color}"/>`
+    `<circle cx="${x}" cy="${y}" r="10" fill="url(#pip)" filter="url(#ds)"/>
+     <circle cx="${x-2}" cy="${y-2}" r="3" fill="${highlight}" opacity="0.7"/>`
   ).join('');
-  diceFace.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">${dots}</svg>`;
+  const shadow = `<defs><filter id="ds" x="-30%" y="-30%" width="160%" height="160%">
+    <feDropShadow dx="1" dy="1.5" stdDeviation="1.2" flood-opacity="0.35"/>
+  </filter></defs>`;
+  diceFace.innerHTML = `<svg viewBox="0 0 100 100" width="100%" height="100%">${defs}${shadow}${dots}</svg>`;
 }
 
-renderDice(null);
+renderDice(1);
 
 function squarePercent(num) {
   for (let r = 0; r < 5; r++)
